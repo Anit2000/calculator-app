@@ -1,6 +1,7 @@
 import { Router } from "express";
 import clientProvider from "../../utils/clientProvider.js";
 import subscriptionRoute from "./recurringSubscriptions.js";
+import calculatorRoutes from "./calculator.js";
 
 const userRoutes = Router();
 userRoutes.use(subscriptionRoute);
@@ -60,4 +61,5 @@ userRoutes.get("/api/activeWebhooks", async (req, res) => {
   return res.status(200).json(activeWebhooks);
 });
 
+userRoutes.use("/api/calculators", calculatorRoutes);
 export default userRoutes;

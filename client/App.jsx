@@ -35,7 +35,6 @@ export default function App() {
             },
           ]}
           matcher={(link) => {
-            console.log(link);
             currentPath === link.destination;
           }}
         />
