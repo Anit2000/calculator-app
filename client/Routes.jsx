@@ -3,9 +3,11 @@ import React from "react";
 import ExitFrame from "./ExitFrame";
 import Index from "./pages/Index";
 import DebugIndex from "./pages/debug/Index";
-import BillingAPI from "./pages/debug/Billing";
-import GetData from "./pages/debug/Data";
 import ActiveWebhooks from "./pages/debug/Webhooks";
+import Calculators from "./pages/debug/Calculators";
+import Prices from "./pages/debug/Prices";
+import Calculator from "./pages/debug/Calculator";
+import CreateCalculator from "./pages/debug/CreateCalculator";
 
 const routes = {
   "/": () => <Index />,
@@ -14,8 +16,12 @@ const routes = {
   //Debug Cards
   "/debug": () => <DebugIndex />,
   "/debug/webhooks": () => <ActiveWebhooks />,
-  "/debug/data": () => <GetData />,
-  "/debug/billing": () => <BillingAPI />,
+  "/debug/calculators": () => <Calculators />,
+  "/debug/calculators/create-calculator": () => <CreateCalculator />,
+  "/debug/calculators/:calculatorId": (calculatorId) => (
+    <Calculator id={calculatorId} />
+  ),
+  "/debug/prices": () => <Prices />,
   //Add your routes here
 };
 

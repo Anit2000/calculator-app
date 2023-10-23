@@ -26,15 +26,18 @@ export default function App() {
         <NavigationMenu
           navigationLinks={[
             {
-              label: "Fetch Data",
-              destination: "/debug/data",
+              label: "Calculators",
+              destination: "/debug/calculators",
             },
             {
-              label: "Billing API",
-              destination: "/debug/billing",
+              label: "Prices",
+              destination: "/debug/prices",
             },
           ]}
-          matcher={(link) => currentPath === link.destination}
+          matcher={(link) => {
+            console.log(link);
+            currentPath === link.destination;
+          }}
         />
         <ApolloClientProvider>{RouteComponents}</ApolloClientProvider>
       </AppBridgeProvider>
