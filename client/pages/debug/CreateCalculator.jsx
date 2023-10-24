@@ -24,6 +24,7 @@ const CreateCalculator = () => {
   };
   const handleSelection = (selectionPayload) =>{
     setSelectedProducts([...selectionPayload.selection]);
+    console.log(selectionPayload)
     setcalculator((prev) =>({
       products:[...selectionPayload.selection].map(el => el.id),
       ...prev

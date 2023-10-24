@@ -36,6 +36,7 @@
     "@shopify/app-bridge": "^3.7.9",
     "@shopify/app-bridge-react": "^3.7.9",
     "@shopify/polaris": "^11.25.0",
+    "@shopify/polaris-tokens": "^8.0.0",
     "@shopify/shopify-api": "^7.7.0",
     "compression": "^1.7.4",
     "cryptr": "^6.3.0",

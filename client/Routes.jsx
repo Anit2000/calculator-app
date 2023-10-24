@@ -8,6 +8,7 @@ import Calculators from "./pages/debug/Calculators";
 import Prices from "./pages/debug/Prices";
 import Calculator from "./pages/debug/Calculator";
 import CreateCalculator from "./pages/debug/CreateCalculator";
+import CreatePrice from "./pages/debug/CreatePrice";
 
 const routes = {
   "/": () => <Index />,
@@ -22,6 +23,7 @@ const routes = {
     <Calculator id={calculatorId} />
   ),
   "/debug/prices": () => <Prices />,
+  "/debug/prices/create-price" : () => <CreatePrice/>
   //Add your routes here
 };
 
