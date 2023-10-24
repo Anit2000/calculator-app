@@ -31,4 +31,17 @@ const getProducts = async (ids, fetch) => {
     .then((data) => data);
   return request;
 };
-export { saveCalculator, listCalculators, getcalculator, getProducts };
+
+const createPrice = async (ids, fetch, options) => {
+  let request = await fetch("/api/calculators/create-price", options)
+    .then((res) => res.json())
+    .then((data) => data);
+  return request;
+};
+export {
+  saveCalculator,
+  listCalculators,
+  getcalculator,
+  getProducts,
+  createPrice,
+};

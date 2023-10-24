@@ -47,6 +47,7 @@
     "raviger": "^4.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-id-generator": "^3.0.2",
     "serve-static": "^1.15.0"
   },
   "devDependencies": {
