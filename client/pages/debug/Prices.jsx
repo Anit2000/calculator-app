@@ -67,7 +67,7 @@ const Prices = () => {
       primaryAction={{
         content: "Add",
         onAction: () => {
-          console.log("save item");
+          navigate("/debug/prices/create-price");
         },
       }}
       secondaryActions={[
