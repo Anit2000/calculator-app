@@ -2,6 +2,7 @@ import { Router } from "express";
 import clientProvider from "../../utils/clientProvider.js";
 import { Calculator, Price } from "../models/Calculator.js";
 import shopify from "../../utils/shopifyConfig.js";
+import mongoose from "mongoose";
 
 const calculatorRoutes = Router();
 
@@ -16,12 +17,40 @@ calculatorRoutes.post("/create-calculator", async (req, res) => {
   try {
     let calculatorData = new Calculator(data);
     let request = await calculatorData.save();
-    console.log(request);
+    res.json(request).status(200)
   } catch (err) {
     console.log(err.message);
+    res.json({ message: err.message }).status(201)
   }
 });
 
+calculatorRoutes.post("/update-calculator", async (req, res) => {
+  let { id, products, pricing } = req.body;
+  let updates = {
+    products: products,
+    price: pricing
+  };
+  updates.price == null ? delete updates.price : "";
+  try {
+    let data = await Calculator.findByIdAndUpdate(id, updates, { new: true });
+    if (pricing == null) {
+      await Calculator.findByIdAndDelete(id);
+      let newData = new Calculator({
+        title: data.title,
+        products: data.products,
+        store: data.store
+      });
+      data = await newData.save();
+
+    }
+    res.json(data).status(200);
+  } catch (err) {
+    console.log(err.message);
+    res.json({
+      message: err.message
+    }).status(201)
+  }
+})
 calculatorRoutes.get("/", async (req, res) => {
   const { shop } = await clientProvider.graphqlClient({
     req,
@@ -98,8 +127,8 @@ calculatorRoutes.post("/create-price", async (req, res) => {
   let pricingData = req.body;
   pricingData.store = shop;
   let pricing = pricingData.pricing.map((el) => {
-    delete el.id;
-    return el;
+    el.id = new mongoose.mongo.ObjectId();
+    return { ...el };
   });
   pricingData.pricing = pricing;
   try {
@@ -115,4 +144,48 @@ calculatorRoutes.post("/create-price", async (req, res) => {
       .status(301);
   }
 });
+
+calculatorRoutes.get("/pricing", async (req, res) => {
+  const { shop } = await clientProvider.graphqlClient({
+    req,
+    res,
+    isOnline: true,
+  });
+  try {
+    let data = await Price.find({ store: shop });
+    res.json(data).status(200);
+  } catch (err) {
+    res.json(err.message).status(201)
+  }
+})
+
+calculatorRoutes.get("/price", async (req, res) => {
+  let { id } = req.query;
+  try {
+    let data = await Price.findById(id);
+    console.log(data);
+    res.json(data).status(200);
+  } catch (err) {
+    console.log(err.message);
+    res.json(err.message).status(201);
+  }
+})
+
+calculatorRoutes.post("/update-price", async (req, res) => {
+  let { id, pricing } = req.body;
+  pricing = pricing.map((el) => {
+    el.id = new mongoose.mongo.ObjectId();
+    return { ...el };
+  });
+  try {
+    let data = await Price.findByIdAndUpdate(id, { pricing: pricing }, { new: true });
+    console.log(data)
+    res.json(data).status(200)
+  } catch (err) {
+    console.log(err.message);
+    res.json({ message: err.message }).status(201);
+  }
+})
+
+
 export default calculatorRoutes;
