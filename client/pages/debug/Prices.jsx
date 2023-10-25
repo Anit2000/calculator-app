@@ -1,60 +1,72 @@
 import {
-  DataTable,
   EmptyState,
   IndexTable,
   LegacyCard,
   Page,
   useIndexResourceState,
   Text,
+  Button,
+  Frame,
+  Loading
 } from "@shopify/polaris";
+import { EditMajor } from "@shopify/polaris-icons";
 import { navigate } from "raviger";
-import React from "react";
+import React, { useEffect,useState } from "react";
+import useFetch from "../../hooks/useFetch";
+import { getPricing } from "../../helpers/calculator";
 
 const Prices = () => {
-  const pricesList = [
-    {
-      id: 1,
-      height: 10,
-      width: 20,
-      price: 100,
-    },
-    {
-      id: 2,
-      height: 15,
-      width: 25,
-      price: 200,
-    },
-  ];
+  const [pricingList,setPricingList] = useState([]);
+  const [loading,setLoading] = useState(true);
+  const fetch = useFetch();
   const resourceName = {
     singular: "Price",
     plural: "Prices",
   };
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(pricesList);
-  const rowMarkup = pricesList.map(({ id, height, width, price }, ind) => (
-    <IndexTable.Row
-      id={id}
-      key={id}
-      selected={selectedResources.includes(id)}
+    useIndexResourceState(pricingList);
+  const rowMarkup = pricingList.map(({ _id, title, pricing }, ind) => (
+    <IndexTable.Row 
+      id={_id}
+      key={_id}
+      selected={selectedResources.includes(_id)}
       position={ind}
     >
       <IndexTable.Cell>
         <Text as="span" variant="bodyMd">
-          {height}
+          {title}
         </Text>
       </IndexTable.Cell>
       <IndexTable.Cell>
         <Text as="span" variant="bodyMd">
-          {width}
+          {pricing.length}
         </Text>
       </IndexTable.Cell>
       <IndexTable.Cell>
-        <Text as="span" variant="bodyMd">
-          {price}
+        <Text as="span" alignment="end">
+          <Button
+            variant="tertiary"
+            onClick={() => navigate(`/debug/prices/price-${_id}`)}
+            icon={EditMajor}
+          />
         </Text>
       </IndexTable.Cell>
     </IndexTable.Row>
   ));
+  useEffect(()=>{
+    (async function getPricingData(){
+      let data = await  getPricing(fetch);
+      setPricingList(data);
+      setLoading(false);
+    })()
+  },[])
+  if(loading){
+    return  <div style={{height: '100px'}}>
+    <Frame>
+      <Loading />
+    </Frame>
+  </div>
+  }
   return (
     <Page
       title="Prices"
@@ -70,50 +82,40 @@ const Prices = () => {
           navigate("/debug/prices/create-price");
         },
       }}
-      secondaryActions={[
-        {
-          content: "Import",
-        },
-        {
-          content: "Export",
-          disabled: true,
-        },
-      ]}
     >
-      {pricesList.length == 0 && (
+      {pricingList.length == 0 && (
         <LegacyCard sectioned>
           <EmptyState
             heading="Manage Calculator Pricing"
-            action={{ content: "Add Price" }}
+            action={{ content: "Add Price",onAction:()=>navigate("/debug/prices/create-price") }}
             image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
           >
             <p>Add pricing logics for calcualtors</p>
           </EmptyState>
         </LegacyCard>
       )}
-      <LegacyCard>
-        <IndexTable
-          resourceName={resourceName}
-          itemCount={pricesList.length}
-          selectedItemsCount={
-            allResourcesSelected ? "All" : selectedResources.length
-          }
-          onSelectionChange={handleSelectionChange}
-          headings={[
-            {
-              title: "Width",
-            },
-            {
-              title: "Height",
-            },
-            {
-              title: "Price",
-            },
-          ]}
-        >
-          {rowMarkup}
-        </IndexTable>
-      </LegacyCard>
+      {pricingList.length > 0 && 
+        <LegacyCard>
+          <IndexTable
+            resourceName={resourceName}
+            itemCount={pricingList.length}
+            selectedItemsCount={
+              allResourcesSelected ? "All" : selectedResources.length
+            }
+            onSelectionChange={handleSelectionChange}
+            headings={[
+              {
+                title: "Pricing",
+              },
+              {
+                title: "Count",
+              }
+            ]}
+          >
+            {rowMarkup}
+          </IndexTable>
+        </LegacyCard>
+      }
     </Page>
   );
 };

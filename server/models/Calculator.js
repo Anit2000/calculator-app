@@ -1,3 +1,4 @@
+import { ObjectId } from "bson";
 import mongoose from "mongoose";
 
 const { Schema } = mongoose;
@@ -14,26 +15,26 @@ const priceSchema = new Schema({
   pricing: {
     type: [
       {
+        _id: {
+          type: ObjectId,
+        },
         width: {
           type: String,
           required: true,
         },
-      },
-      {
         height: {
           type: String,
           required: true,
         },
-      },
-      {
         price: {
           type: String,
           required: true,
         },
-      },
+      }
     ],
   },
 });
+export const Price = mongoose.model("Pricing", priceSchema);
 
 const calcualtorSchema = new Schema({
   title: {
@@ -45,7 +46,8 @@ const calcualtorSchema = new Schema({
     required: true,
   },
   price: {
-    type: priceSchema,
+    type: mongoose.ObjectId,
+    ref: 'Pricing'
   },
   products: {
     type: [String],
@@ -53,4 +55,4 @@ const calcualtorSchema = new Schema({
 });
 
 export const Calculator = mongoose.model("Calculator", calcualtorSchema);
-export const Price = mongoose.model("Pricing", priceSchema);
+
