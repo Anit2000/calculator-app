@@ -61,6 +61,7 @@ calculatorRoutes.get("/", async (req, res) => {
     let calculatorList = await Calculator.find({ store: shop });
     res.json(calculatorList ? calculatorList : []).status(200);
   } catch (err) {
+    console.log(err);
     res
       .json({
         message: err.message,
