@@ -26,7 +26,8 @@ const updateCalculator = (data, fetch) => {
 const listCalculators = async (fetch) => {
   let request = await fetch("/api/calculators")
     .then((res) => res.json())
-    .then((data) => data);
+    .then((data) => data)
+    .catch(err => console.log(err));
   return request;
 };
 
