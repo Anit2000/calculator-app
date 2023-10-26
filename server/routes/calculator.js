@@ -1,7 +1,6 @@
 import { Router } from "express";
 import clientProvider from "../../utils/clientProvider.js";
 import { Calculator, Price } from "../models/Calculator.js";
-import shopify from "../../utils/shopifyConfig.js";
 import mongoose from "mongoose";
 
 const calculatorRoutes = Router();
@@ -164,7 +163,6 @@ calculatorRoutes.get("/price", async (req, res) => {
   let { id } = req.query;
   try {
     let data = await Price.findById(id);
-    console.log(data);
     res.json(data).status(200);
   } catch (err) {
     console.log(err.message);
@@ -180,7 +178,6 @@ calculatorRoutes.post("/update-price", async (req, res) => {
   });
   try {
     let data = await Price.findByIdAndUpdate(id, { pricing: pricing }, { new: true });
-    console.log(data)
     res.json(data).status(200)
   } catch (err) {
     console.log(err.message);
@@ -188,5 +185,9 @@ calculatorRoutes.post("/update-price", async (req, res) => {
   }
 })
 
+calculatorRoutes.post("/storefront/create-variant", async (req, res) => {
+  let data = req.body;
+  console.log(data);
+})
 
 export default calculatorRoutes;
