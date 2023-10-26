@@ -3,6 +3,7 @@ import {
   Card,
   HorizontalStack,
   Layout,
+  LegacyCard,
   Page,
   Text,
   VerticalStack,
@@ -20,70 +21,11 @@ const DebugIndex = () => {
       >
         <Layout>
           <Layout.Section oneHalf>
-            <Card>
-              <VerticalStack gap="2">
-                <Text as="h2" variant="headingMd">
-                  Webhooks
-                </Text>
-                <Text>Explored actively registered webhooks</Text>
-                <HorizontalStack wrap={false} align="end">
-                  <Button
-                    primary
-                    onClick={() => {
-                      navigate("/debug/webhooks");
-                    }}
-                  >
-                    Explore
-                  </Button>
-                </HorizontalStack>
-              </VerticalStack>
-            </Card>
+           <LegacyCard></LegacyCard>
           </Layout.Section>
           <Layout.Section oneHalf>
-            <Card>
-              <VerticalStack gap="2">
-                <Text as="h2" variant="headingMd">
-                  Data Fetching
-                </Text>
-                <Text>
-                  Send GET, POST and GraphQL queries to your app's backend.
-                </Text>
-                <HorizontalStack wrap={false} align="end">
-                  <Button
-                    primary
-                    onClick={() => {
-                      navigate("/debug/data");
-                    }}
-                  >
-                    Explore
-                  </Button>
-                </HorizontalStack>
-              </VerticalStack>
-            </Card>
+            <LegacyCard></LegacyCard>
           </Layout.Section>
-          <Layout.Section oneHalf>
-            <Card>
-              <VerticalStack gap="2">
-                <Text as="h2" variant="headingMd">
-                  Billing API
-                </Text>
-                <Text>
-                  Subscribe merchant to a plan and explore existing plans.
-                </Text>
-                <HorizontalStack wrap={false} align="end">
-                  <Button
-                    primary
-                    onClick={() => {
-                      navigate("/debug/billing");
-                    }}
-                  >
-                    Cha-Ching
-                  </Button>
-                </HorizontalStack>
-              </VerticalStack>
-            </Card>
-          </Layout.Section>
-          <Layout.Section oneHalf />
         </Layout>
       </Page>
     </>
