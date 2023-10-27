@@ -2,6 +2,7 @@ import "@shopify/shopify-api/adapters/node";
 import "dotenv/config";
 import Express from "express";
 import mongoose from "mongoose";
+import upload from 'express-fileupload';
 import { resolve } from "path";
 import shopify from "../utils/shopifyConfig.js";
 
@@ -70,6 +71,7 @@ const createServer = async (root = process.cwd()) => {
   );
 
   app.use(Express.json());
+  app.use(upload());
 
   app.post("/graphql", verifyRequest, async (req, res) => {
     try {
