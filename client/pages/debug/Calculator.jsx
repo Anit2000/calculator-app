@@ -116,11 +116,13 @@ const Calculator = () => {
       if(data.products){
         data.products = data.products.map(el => el.includes("/Product/") ? el.split("/Product/")[1] : el);
         setInitialSelection(data.products.map((el) => ({ id: `gid://shopify/Product/${el}` })));
-        let {products} = await getProducts(
-          data.products.join(","),
-          fetch
-          );
-        setProducts(products);
+        if(data.products.length > 0){
+          let {products} = await getProducts(
+            data.products.join(","),
+            fetch
+            );
+          setProducts(products);
+        }
       }
       if(data.price){
         let pricingData = await  getPrice(data.price,fetch);
