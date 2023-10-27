@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { navigate } from "raviger";
 import nextId from "react-id-generator";
-import { createPrice } from "../../helpers/calculator";
+import { createPrice, updatePrice,parseCsv } from "../../helpers/calculator";
 import useFetch from "../../hooks/useFetch";
 import {
   EmptyState,
@@ -19,11 +19,15 @@ import {
   Icon,
   Toast,
   Frame,
+  DropZone,
+  Thumbnail,
+  Spinner,
 } from "@shopify/polaris";
 import {
   CashDollarMajor,
   CirclePlusMinor,
   DeleteMinor,
+  NoteMinor
 } from "@shopify/polaris-icons";
 
 const CreatePrice = () => {
@@ -35,6 +39,9 @@ const CreatePrice = () => {
   const [priceList, setPriceList] = useState([]);
   const [list, setList] = useState([]);
   const [toastActive, setToastActive] = useState(false);
+  const [file, setFile] = useState();
+  const [fileModal,setFileModal] = useState(false);
+  const [priceLoader,setPriceLoader] = useState(false);
   const fetch = useFetch();
   function handlePriceChange(newValue) {
     setPriceTitle(newValue);
@@ -53,6 +60,10 @@ const CreatePrice = () => {
     setOpen(false);
     setList([]);
   };
+  function closeFileModal(){
+    setFileModal(false);
+    setFile();
+  }
   const resourceName = {
     singular: "Price",
     plural: "Prices",
@@ -98,6 +109,51 @@ const CreatePrice = () => {
     });
     navigate("/debug/prices/");
   };
+  const handleDropZoneDrop = useCallback(
+    (_dropFiles, acceptedFiles, _rejectedFiles) =>
+      setFile(acceptedFiles[0]),
+    [],
+  );
+  const handleFileSave = async () =>{
+    setPriceLoader(true);
+    let data = new FormData();
+    console.log(file)
+    data.append('file',file);
+    data.append('storeData',{
+      'store':'testing'
+    })
+    try{
+      const request = await parseCsv(fetch,{
+        method:"POST",
+        body: data
+      });
+      setPriceList(request);
+      setFileModal(false);
+      setFile();
+      setPriceLoader(false);
+    }catch(err){
+      console.log(err);
+    }
+  }
+  const validImageTypes = ['csv'];
+  const fileUpload = !file && <DropZone.FileUpload />;
+  const uploadedFile = file && (<LegacyStack>
+      <Thumbnail
+        size="small"
+        alt={file.name}
+        source={
+          validImageTypes.includes(file.type)
+            ? window.URL.createObjectURL(file)
+            : NoteMinor
+        }
+      />
+      <div>
+        {file.name}{' '}
+        <Text variant="bodySm" as="p">
+          {file.size} bytes
+        </Text>
+      </div>
+    </LegacyStack>);
   return (
     <Frame>
       <Page
@@ -108,6 +164,12 @@ const CreatePrice = () => {
           },
         }}
         secondaryActions={[
+          {
+            content:"Import",
+            onAction: () =>{
+              setFileModal(true)
+            }
+          },
           {
             content: "Add Price",
             onAction: () => {
@@ -135,6 +197,28 @@ const CreatePrice = () => {
             onChange={handlePriceChange}
           />
         </div>
+        <Modal open={fileModal}
+          onClose={closeFileModal}
+          title="Upload CSV File"
+          primaryAction={{
+            content:"Save",
+            loading: priceLoader,
+            onAction:handleFileSave
+          }}
+          secondaryActions={[
+            {
+              content:'Cancel',
+              onAction:closeFileModal
+            }
+          ]}
+        >
+          <div style={{padding: "40px"}}>
+            <DropZone allowMultiple={false} accept=".csv" onDrop={handleDropZoneDrop}>
+              {uploadedFile}
+              {fileUpload}
+            </DropZone>
+          </div>
+        </Modal>
         <Modal
           open={open}
           onClose={() => setOpen(false)}

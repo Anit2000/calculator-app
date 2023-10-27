@@ -66,6 +66,11 @@ const updatePrice = async (fetch, options) => {
   let request = await fetch("/api/calculators/update-price", options).then(res => res.json()).then(data => data);
   return request;
 }
+
+const parseCsv = async (fetch, options) => {
+  let request = await fetch("/api/calculators/parse-csv", options).then(res => res.json()).then(data => data);
+  return request;
+}
 export {
   saveCalculator,
   updateCalculator,
@@ -76,4 +81,5 @@ export {
   getPricing,
   getPrice,
   updatePrice,
+  parseCsv
 };

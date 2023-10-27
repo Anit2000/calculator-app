@@ -2,6 +2,7 @@ import { Router } from "express";
 import clientProvider from "../../utils/clientProvider.js";
 import { Calculator, Price } from "../models/Calculator.js";
 import mongoose from "mongoose";
+import csv from "csvtojson";
 
 const calculatorRoutes = Router();
 
@@ -185,6 +186,15 @@ calculatorRoutes.post("/update-price", async (req, res) => {
   }
 })
 
+calculatorRoutes.post("/parse-csv", (req, res) => {
+  let data = [];
+  csv({ trim: true, }).fromString(req.files.file.data.toString()).subscribe((json) => data.push(json), (err) => {
+    res.json(err).status(201)
+  }, () => {
+    data = data.map(el => ({ id: new mongoose.Types.ObjectId(), ...el }));
+    res.json(data).status(200)
+  });
+})
 calculatorRoutes.post("/storefront/create-variant", async (req, res) => {
   let data = req.body;
   console.log(data);
