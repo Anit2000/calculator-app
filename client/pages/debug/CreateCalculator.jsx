@@ -17,15 +17,17 @@ const CreateCalculator = () => {
   const [selectedPrice, setSelectedPrice] = useState([]);
   const [pricingList,setPricingList] = useState([]);
   const [updateData,setUpdateData] = useState(false);
+  const [saveLoader,setSaveLoader] = useState(false)
+
+
   const fetch = useFetch();
   const handleChange = useCallback((newValue)=>{
-    console.log(newValue);
-    setTitle(newValue);
     setcalculator((prev) =>({
       title:newValue,
       ...prev
     }))
     setPageDisabled(false)
+    return setTitle(newValue);
   },[]) 
   const handleSelection = (selectionPayload) =>{
     setSelectedProducts([...selectionPayload.selection]);
@@ -89,12 +91,20 @@ const CreateCalculator = () => {
       </IndexTable.Cell>
     </IndexTable.Row>
   );
+  async function saveCalculatorContent(){
+    setSaveLoader(true);
+    await saveCalculator({
+      ...calculator,
+      title:title
+    },fetch);
+    setSaveLoader(false);
+    navigate("/debug/calculators");
+  }
   useEffect(()=>{
     (
       async function getData(){
         let pricingList = await getPricing(fetch);
         pricingList = pricingList.map(price => ({id: price._id,...price}));
-        console.log(pricingList)
         setPricingList(pricingList);
       }
     )()
@@ -111,10 +121,8 @@ const CreateCalculator = () => {
         primaryAction={{
           content: "Save",
           disabled: pageDisabled,
-          onAction:async ()=>{
-            await saveCalculator(calculator,fetch)
-            navigate("/debug/calculators");
-          }
+          onAction:saveCalculatorContent,
+          loading:saveLoader
         }}
       >
         <Modal 
