@@ -57,6 +57,7 @@ const Calculators = () => {
     (async function fetchCalcData(){
       try{
         let data = await listCalculators(fetch);
+        if(data) data = data.map(el => ({id: el._id,...el}));
         data ? setCalculators(data) : "";
         setLoading(false)
         }catch(err){

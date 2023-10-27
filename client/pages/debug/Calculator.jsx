@@ -35,7 +35,6 @@ const Calculator = () => {
   const [selectedPrice, setSelectedPrice] = useState([]);
   const [toastDisplay,setToastDisplay] = useState(false);
 
-  console.log(Calculator);
   let id = path.split("/");
   id = id[id.length - 1];
   async function handleSelection(selectedPayload) {
