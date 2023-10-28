@@ -19,7 +19,7 @@ export const createVariant = async (req, res) => {
       calculator.products.join(",").includes(productId)
     );
     // getting pricings as per calculator
-    let { pricing } = await Price.findById(productCalculator.price).exec();
+    let { pricing } = await Price.findById(productCalculator.price);
     // sorting pricing
     pricing = pricing
       .map((price) => ({
@@ -64,12 +64,15 @@ export const returnPrices = async (req, res) => {
   try {
     // getting list of all calculators related to store
     let calculators = await Calculator.find({ store: store });
+    console.log("calculator found", calculators);
     // filtering out claculator that contains logic for product
     let productCalculator = calculators.find((calculator) =>
       calculator.products.join(",").includes(productId)
     );
+    console.log("Product found", productCalculator);
     // getting pricings as per calculator
-    let { pricing } = await Price.findById(productCalculator.price).exec();
+    let { pricing } = await Price.findById(productCalculator.price);
+    console.log("Pricing found", pricing);
     // sorting pricing
     const priceData = pricing.map((price) => ({
       area: price.width * price.height,
