@@ -3,14 +3,16 @@ import clientProvider from "../../utils/clientProvider.js";
 import mongoose from "mongoose";
 
 export const createVariant = async (req, res) => {
+  console.log("url hit");
   let { productId, height, width } = req.body;
   // console.log(productId, "here");
+  console.log(productId);
   let requestedArea = Number(height) * Number(width);
   const { client } = await clientProvider.offline.graphqlClient({
     shop: res.locals.user_shop,
   });
   let store = client.session.shop;
-  console.log("shop name here", client.session.shop);
+
   try {
     // getting list of all calculators related to store
     let calculators = await Calculator.find({ store: store });
@@ -36,15 +38,24 @@ export const createVariant = async (req, res) => {
     const { client } = await clientProvider.offline.restClient({
       shop: store,
     });
-    let variantTitle = `calcualtor-${new mongoose.Types.ObjectId().toString()}`;
+    let productData = await client.get({
+      path: `/products/${productId}`,
+    });
+
+    let options = productData.body.product.options;
+    let variantData = {
+      price: calculatedPrice,
+    };
+    options.forEach((el, ind) => {
+      variantData[
+        `option${ind + 1}`
+      ] = `calcualtor-${new mongoose.Types.ObjectId().toString()}`;
+    });
     let data = await client.post({
       path: `/products/${productId}/variants`,
       data: {
         id: 8289044136210,
-        variant: {
-          price: calculatedPrice,
-          option1: variantTitle,
-        },
+        variant: variantData,
       },
     });
     res.json(data.body.variant).status(201);
@@ -55,24 +66,19 @@ export const createVariant = async (req, res) => {
 
 export const returnPrices = async (req, res) => {
   let { productId } = req.body;
-  console.log(req.body, "here product id");
   const { client } = await clientProvider.offline.graphqlClient({
     shop: res.locals.user_shop,
   });
   let store = client.session.shop;
-  console.log("shop name here", client.session.shop);
   try {
     // getting list of all calculators related to store
     let calculators = await Calculator.find({ store: store });
-    console.log("calculator found", calculators);
     // filtering out claculator that contains logic for product
-    let productCalculator = calculators.find((calculator) =>
-      calculator.products.indexOf(productId) != -1
+    let productCalculator = calculators.find(
+      (calculator) => calculator.products.indexOf(productId) != -1
     );
-    console.log("Product found", productCalculator);
     // getting pricings as per calculator
     let { pricing } = await Price.findById(productCalculator.price);
-    console.log("Pricing found", pricing);
     // sorting pricing
     const priceData = pricing.map((price) => ({
       area: price.width * price.height,
