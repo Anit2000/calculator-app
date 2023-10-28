@@ -10,6 +10,7 @@ export const createVariant = async (req, res) => {
     shop: res.locals.user_shop,
   });
   let store = client.session.shop;
+  console.log("shop name here", client.session.shop);
   try {
     // getting list of all calculators related to store
     let calculators = await Calculator.find({ store: store });
