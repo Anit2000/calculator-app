@@ -47,6 +47,7 @@ export const createVariant = async (req, res) => {
     let variantData = {
       price: calculatedPrice,
       image: imageURL,
+      inventory_policy: "continue"
     };
     options.forEach((el, ind) => {
       variantData[
