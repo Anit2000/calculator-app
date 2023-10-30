@@ -16,7 +16,7 @@ const priceSchema = new Schema({
     type: [
       {
         _id: {
-          type: ObjectId,
+          type: ObjectId, 
         },
         width: {
           type: String,
@@ -30,13 +30,13 @@ const priceSchema = new Schema({
           type: String,
           required: true,
         },
-      }
+      },
     ],
   },
 });
-export const Price = mongoose.model("Pricing", priceSchema);
+export const Price = mongoose.model("Price", priceSchema);
 
-const calcualtorSchema = new Schema({
+const calculatorSchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -46,13 +46,12 @@ const calcualtorSchema = new Schema({
     required: true,
   },
   price: {
-    type: mongoose.ObjectId,
-    ref: 'Pricing'
+    type: Schema.Types.ObjectId,
+    ref: "Price",
   },
   products: {
     type: [String],
   },
 });
 
-export const Calculator = mongoose.model("Calculator", calcualtorSchema);
-
+export const Calculator = mongoose.model("Calculator", calculatorSchema);
