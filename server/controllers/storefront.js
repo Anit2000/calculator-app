@@ -31,7 +31,7 @@ export const createVariant = async (req, res) => {
       .sort((a, b) => a.area - b.area);
     // filtering price to calcualte
     let filteredPrice = pricing.find((price) => requestedArea <= price.area);
-    let pricePerUnit = filteredPrice.area / Number(filteredPrice._doc.price);
+    let pricePerUnit = Number(filteredPrice._doc.price) / filteredPrice.area;
     let calculatedPrice = requestedArea * pricePerUnit;
 
     // making res request for variant
@@ -43,8 +43,10 @@ export const createVariant = async (req, res) => {
     });
 
     let options = productData.body.product.options;
+    let imageURL = productData.body.product.image.src;
     let variantData = {
       price: calculatedPrice,
+      image: imageURL,
     };
     options.forEach((el, ind) => {
       variantData[
@@ -54,7 +56,6 @@ export const createVariant = async (req, res) => {
     let data = await client.post({
       path: `/products/${productId}/variants`,
       data: {
-        id: 8289044136210,
         variant: variantData,
       },
     });
@@ -66,19 +67,24 @@ export const createVariant = async (req, res) => {
 
 export const returnPrices = async (req, res) => {
   let { productId } = req.body;
+  console.log(productId, "here get price");
   const { client } = await clientProvider.offline.graphqlClient({
     shop: res.locals.user_shop,
   });
   let store = client.session.shop;
+  let productString = `gid://shopify/Product/${productId}`
   try {
     // getting list of all calculators related to store
     let calculators = await Calculator.find({ store: store });
+    console.log("calculators all",calculators)
     // filtering out claculator that contains logic for product
-    let productCalculator = calculators.find(
-      (calculator) => calculator.products.indexOf(productId) != -1
+    let productCalculator = calculators.find((calculator) =>
+      calculator.products.includes(productString)
     );
+    console.log("calculators product",productCalculator)
     // getting pricings as per calculator
     let { pricing } = await Price.findById(productCalculator.price);
+    console.log("price product",pricing)
     // sorting pricing
     const priceData = pricing.map((price) => ({
       area: price.width * price.height,
