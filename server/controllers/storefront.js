@@ -47,12 +47,10 @@ export const createVariant = async (req, res) => {
     let variantData = {
       price: calculatedPrice,
       image: imageURL,
-      inventory_policy: "continue"
+      inventory_policy: "continue",
     };
     options.forEach((el, ind) => {
-      variantData[
-        `option${ind + 1}`
-      ] = `calcualtor-${new mongoose.Types.ObjectId().toString()}`;
+      variantData[`option${ind + 1}`] = `cal-${el.name}`;
     });
     let data = await client.post({
       path: `/products/${productId}/variants`,
@@ -73,19 +71,19 @@ export const returnPrices = async (req, res) => {
     shop: res.locals.user_shop,
   });
   let store = client.session.shop;
-  let productString = `gid://shopify/Product/${productId}`
+  let productString = `gid://shopify/Product/${productId}`;
   try {
     // getting list of all calculators related to store
     let calculators = await Calculator.find({ store: store });
-    console.log("calculators all",calculators)
+    console.log("calculators all", calculators);
     // filtering out claculator that contains logic for product
     let productCalculator = calculators.find((calculator) =>
       calculator.products.includes(productString)
     );
-    console.log("calculators product",productCalculator)
+    console.log("calculators product", productCalculator);
     // getting pricings as per calculator
     let { pricing } = await Price.findById(productCalculator.price);
-    console.log("price product",pricing)
+    console.log("price product", pricing);
     // sorting pricing
     const priceData = pricing.map((price) => ({
       area: price.width * price.height,

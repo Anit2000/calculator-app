@@ -13,7 +13,10 @@ calculatorRoutes.post("/create-calculator", async (req, res) => {
     isOnline: true,
   });
   let data = req.body;
+  console.log(data);
   data.store = shop;
+  data.minMaxWidth = { min: data.minWidth, max: data.maxWidth };
+  data.minMaxHeight = { min: data.minHeight, max: data.maxHeight };
   try {
     let calculatorData = new Calculator(data);
     let request = await calculatorData.save();
@@ -25,10 +28,12 @@ calculatorRoutes.post("/create-calculator", async (req, res) => {
 });
 
 calculatorRoutes.post("/update-calculator", async (req, res) => {
-  let { id, products, pricing } = req.body;
+  let { id, products, pricing, minMaxWidth, minMaxHeight } = req.body;
   let updates = {
     products: products,
     price: pricing,
+    minMaxWidth: minMaxWidth,
+    minMaxHeight: minMaxHeight,
   };
   updates.price == null ? delete updates.price : "";
   try {
@@ -39,6 +44,8 @@ calculatorRoutes.post("/update-calculator", async (req, res) => {
         title: data.title,
         products: data.products,
         store: data.store,
+        minMaxWidth: data.minMaxWidth,
+        minMaxHeight: data.minMaxHeight,
       });
       data = await newData.save();
     }
