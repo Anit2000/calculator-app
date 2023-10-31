@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Button,
   EmptyState,
@@ -8,25 +8,58 @@ import {
   useIndexResourceState,
   Badge,
   Frame,
-  Loading
+  Loading,
+  Modal,
+  TextContainer,
 } from "@shopify/polaris";
 import { ProductsMajor, EditMajor } from "@shopify/polaris-icons";
 import { navigate } from "raviger";
 import { Page } from "@shopify/polaris";
 import useFetch from "../../hooks/useFetch";
-import { listCalculators } from "../../helpers/calculator";
+import { deletecalcluator, listCalculators } from "../../helpers/calculator";
 
 const Calculators = () => {
   const fetch = useFetch();
-  const [loading,setLoading] = useState(true);
-  const [calculators,setCalculators] = useState([]);
- 
+  const [loading, setLoading] = useState(true);
+  const [calculators, setCalculators] = useState([]);
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setDeleteModalOpen(false);
+  }, []);
+
+  const handleDeleteCalculator = async () => {
+    setLoading(true);
+    let deleteData = {
+      ids: selectedResources,
+    };
+    let response = await deletecalcluator(fetch, {
+      method: "DELETE",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(deleteData),
+    });
+
+    clearSelection()
+    await fetchCalcData();
+    handleCloseDeleteModal();
+    setLoading(false);
+  };
+
   const resourceName = {
     singular: "Calculator",
     plural: "Calculators",
   };
-  const { selectedResources, allResourcesSelected, handleSelectionChange } =
+  const promotedBulkActions = [
+    {
+      content: "Delete Calculators",
+      onAction: () => setDeleteModalOpen(true),
+    },
+  ];
+  const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection } =
     useIndexResourceState(calculators);
+
   const rowMarkup = calculators.map(({ _id, title, products }, ind) => (
     <IndexTable.Row
       id={_id}
@@ -53,24 +86,27 @@ const Calculators = () => {
       </IndexTable.Cell>
     </IndexTable.Row>
   ));
-  useEffect(()=>{
-    (async function fetchCalcData(){
-      try{
-        let data = await listCalculators(fetch);
-        if(data) data = data.map(el => ({id: el._id,...el}));
-        data ? setCalculators(data) : "";
-        setLoading(false)
-        }catch(err){
-        console.log(err.message)
-      }
-    })()
-  },[])
-  if(loading){
-    return  <div style={{height: '100px'}}>
-    <Frame>
-      <Loading />
-    </Frame>
-  </div>
+  async function fetchCalcData() {
+    try {
+      let data = await listCalculators(fetch);
+      if (data) data = data.map((el) => ({ id: el._id, ...el }));
+      data ? setCalculators(data) : "";
+      setLoading(false);
+    } catch (err) {
+      console.log(err.message);
+    }
+  }
+  useEffect(() => {
+    fetchCalcData();
+  }, []);
+  if (loading) {
+    return (
+      <div style={{ height: "100px" }}>
+        <Frame>
+          <Loading />
+        </Frame>
+      </div>
+    );
   }
   return (
     <Page
@@ -87,20 +123,21 @@ const Calculators = () => {
             heading="Manage your Calcualtors"
             action={{
               content: "Add Calculator",
-              onAction: () => navigate("/debug/calculators/create-calculator")
+              onAction: () => navigate("/debug/calculators/create-calculator"),
             }}
             image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
           ></EmptyState>
         </LegacyCard>
       )}
       {calculators.length > 0 && (
-        <LegacyCard>
+        <LegacyCard className="card-spacing">
           <IndexTable
             resourceName={resourceName}
             itemCount={calculators.length}
             selectedItemsCount={
               allResourcesSelected ? "All" : selectedResources.length
             }
+            hasMoreItems={true}
             headings={[
               { title: "Name" },
               { title: "Products" },
@@ -114,11 +151,36 @@ const Calculators = () => {
               },
             ]}
             onSelectionChange={handleSelectionChange}
+            promotedBulkActions={promotedBulkActions}
           >
             {rowMarkup}
           </IndexTable>
         </LegacyCard>
       )}
+      <Modal
+        open={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        title="Delete Calculator"
+        primaryAction={{
+          content: "Confirm Delete",
+          onAction: handleDeleteCalculator,
+        }}
+        secondaryActions={[
+          {
+            content: "Cancel",
+            onAction: handleCloseDeleteModal,
+          },
+        ]}
+      >
+        <Modal.Section>
+          <TextContainer>
+            <p>
+              Are you sure you want to delete this calculator? This action
+              cannot be undone.
+            </p>
+          </TextContainer>
+        </Modal.Section>
+      </Modal>
     </Page>
   );
 };

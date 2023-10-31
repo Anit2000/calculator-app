@@ -7,26 +7,57 @@ import {
   Text,
   Button,
   Frame,
-  Loading
+  Loading,
+  Modal,
+  TextContainer,
 } from "@shopify/polaris";
 import { EditMajor } from "@shopify/polaris-icons";
 import { navigate } from "raviger";
-import React, { useEffect,useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
-import { getPricing } from "../../helpers/calculator";
+import { deletePrice, getPricing } from "../../helpers/calculator";
 
 const Prices = () => {
-  const [pricingList,setPricingList] = useState([]);
-  const [loading,setLoading] = useState(true);
   const fetch = useFetch();
+  const [pricingList, setPricingList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setDeleteModalOpen(false);
+  }, []);
+
+  const handleDeletePricing = async () => {
+    setLoading(true);
+    let deleteData = {
+      ids: selectedResources,
+    };
+    let response = await deletePrice(fetch, {
+      method: "DELETE",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(deleteData),
+    });
+    clearSelection()
+    await getPricingData();
+    handleCloseDeleteModal();
+    setLoading(false);
+  };
   const resourceName = {
     singular: "Price",
     plural: "Prices",
   };
-  const { selectedResources, allResourcesSelected, handleSelectionChange } =
+  const promotedBulkActions = [
+    {
+      content: "Delete Pricing Groups",
+      onAction: () => setDeleteModalOpen(true),
+    },
+  ];
+  const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection } =
     useIndexResourceState(pricingList);
   const rowMarkup = pricingList.map(({ _id, title, pricing }, ind) => (
-    <IndexTable.Row 
+    <IndexTable.Row
       id={_id}
       key={_id}
       selected={selectedResources.includes(_id)}
@@ -53,19 +84,22 @@ const Prices = () => {
       </IndexTable.Cell>
     </IndexTable.Row>
   ));
-  useEffect(()=>{
-    (async function getPricingData(){
-      let data = await  getPricing(fetch);
-      setPricingList(data);
-      setLoading(false);
-    })()
-  },[])
-  if(loading){
-    return  <div style={{height: '100px'}}>
-    <Frame>
-      <Loading />
-    </Frame>
-  </div>
+  async function getPricingData() {
+    let data = await getPricing(fetch);
+    setPricingList(data);
+    setLoading(false);
+  }
+  useEffect(() => {
+    getPricingData();
+  }, []);
+  if (loading) {
+    return (
+      <div style={{ height: "100px" }}>
+        <Frame>
+          <Loading />
+        </Frame>
+      </div>
+    );
   }
   return (
     <Page
@@ -87,14 +121,17 @@ const Prices = () => {
         <LegacyCard sectioned>
           <EmptyState
             heading="Manage Calculator Pricing"
-            action={{ content: "Add Price",onAction:()=>navigate("/debug/prices/create-price") }}
+            action={{
+              content: "Add Price",
+              onAction: () => navigate("/debug/prices/create-price"),
+            }}
             image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
           >
             <p>Add pricing logics for calcualtors</p>
           </EmptyState>
         </LegacyCard>
       )}
-      {pricingList.length > 0 && 
+      {pricingList.length > 0 && (
         <LegacyCard>
           <IndexTable
             resourceName={resourceName}
@@ -109,13 +146,40 @@ const Prices = () => {
               },
               {
                 title: "Count",
-              }
+              },
             ]}
+            promotedBulkActions={promotedBulkActions}
           >
             {rowMarkup}
           </IndexTable>
         </LegacyCard>
-      }
+      )}
+      <Frame>
+        <Modal
+          open={isDeleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          title="Delete Calculator"
+          primaryAction={{
+            content: "Confirm Delete",
+            onAction: handleDeletePricing,
+          }}
+          secondaryActions={[
+            {
+              content: "Cancel",
+              onAction: handleCloseDeleteModal,
+            },
+          ]}
+        >
+          <Modal.Section>
+            <TextContainer>
+              <p>
+                Are you sure you want to delete this calculator? This action
+                cannot be undone.
+              </p>
+            </TextContainer>
+          </Modal.Section>
+        </Modal>
+      </Frame>
     </Page>
   );
 };
