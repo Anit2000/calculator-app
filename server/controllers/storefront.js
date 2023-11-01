@@ -83,13 +83,13 @@ export const returnPrices = async (req, res) => {
     console.log("calculators product", productCalculator);
     // getting pricings as per calculator
     let { pricing } = await Price.findById(productCalculator.price);
-    console.log("price product", pricing);
+    // console.log("price product", pricing);
     // sorting pricing
     const priceData = pricing.map((price) => ({
       area: price.width * price.height,
       price: price.price,
     }));
-    res.json(priceData).status(200);
+    res.json({ price: priceData, calcualtor: calculators }).status(200);
   } catch (err) {
     res.json(err.message).status(501);
   }
