@@ -33,6 +33,10 @@ export default function App() {
               label: "Prices",
               destination: "/debug/prices",
             },
+            {
+              label:"Options",
+              destination:"/debug/options"
+            }
           ]}
           matcher={(link) => {
             currentPath === link.destination;

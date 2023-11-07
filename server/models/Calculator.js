@@ -39,6 +39,35 @@ const priceSchema = new Schema(
 );
 export const Price = mongoose.model("Price", priceSchema);
 
+const optionSchema = new Schema({
+  store: {
+    type: String,
+    required: true
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  options: [
+    {
+      value: {
+        type: String,
+      },
+      price: {
+        type: Number
+      }
+    }
+  ],
+  rule: {
+    type: Number,
+    min: 0,
+    max: 1,
+    required: true
+  }
+})
+
+export const Option = mongoose.model("Option", optionSchema);
+
 const calculatorSchema = new Schema(
   {
     title: {
@@ -55,6 +84,9 @@ const calculatorSchema = new Schema(
     },
     products: {
       type: [String],
+    },
+    options: {
+      type: String
     },
     minMaxWidth: {
       min: {

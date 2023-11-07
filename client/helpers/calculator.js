@@ -111,6 +111,27 @@ const parseCsv = async (fetch, options) => {
     .then((data) => data);
   return request;
 };
+
+const listOptions = async (fetch) => {
+  let request = await fetch("/api/calculators/options").then(res => res.json()).then(data => data);
+  return request;
+}
+const getOption = async (fetch, id) => {
+  let request = await fetch("/api/calculators/option?id=" + id).then(res => res.json()).then(data => data);
+  return request;
+}
+const createOption = async (fetch, options) => {
+  let request = await fetch("/api/calculators/create-option", options)
+    .then((res) => res.json())
+    .then((data) => data);
+  return request
+}
+const updateOption = async (fetch, option) => {
+  let request = await fetch("/api/calculators/update-option", option)
+    .then((res) => res.json())
+    .then((data) => data);
+  return request
+}
 export {
   saveCalculator,
   updateCalculator,
@@ -126,4 +147,8 @@ export {
   countPricing,
   deletecalcluator,
   deletePrice,
+  createOption,
+  listOptions,
+  getOption,
+  updateOption
 };

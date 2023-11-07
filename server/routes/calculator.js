@@ -1,6 +1,6 @@
 import { Router } from "express";
 import clientProvider from "../../utils/clientProvider.js";
-import { Calculator, Price } from "../models/Calculator.js";
+import { Calculator, Price, Option } from "../models/Calculator.js";
 import mongoose from "mongoose";
 import csv from "csvtojson";
 
@@ -305,5 +305,59 @@ calculatorRoutes.post("/storefront/create-variant", async (req, res) => {
   let data = req.body;
   console.log(data);
 });
+
+calculatorRoutes.get("/options", async (req, res) => {
+  const { shop } = await clientProvider.graphqlClient({
+    req,
+    res,
+    isOnline: true,
+  });
+  try {
+    let data = await Option.find({ store: shop });
+    res.json(data).status(200);
+  } catch (err) {
+    res.json({
+      message: err.message
+    }).status(201)
+  }
+})
+calculatorRoutes.get("/option", async (req, res) => {
+  let id = req.query.id;
+  try {
+    let data = await Option.findById(id);
+    res.json(data).status(200);
+  } catch (err) {
+    res.json({
+      message: err.message
+    }).status(201)
+  }
+})
+calculatorRoutes.post("/create-option", async (req, res) => {
+  let data = req.body;
+  const { shop } = await clientProvider.graphqlClient({
+    req,
+    res,
+    isOnline: true,
+  });
+  data.store = shop;
+  let requestData = new Option(data);
+  try {
+    let responseData = await requestData.save();
+    res.json(responseData).status(200);
+  } catch (err) {
+    res.json({
+      message: err.message,
+    }).status(201);
+  }
+})
+calculatorRoutes.post("/update-option", async (req, res) => {
+  let { id, update } = req.body;
+  try {
+    let responseData = await Option.findByIdAndUpdate(id, update);
+    res.json(responseData).status(200)
+  } catch (err) {
+    res.json({ message: err.message }).status(201)
+  }
+})
 
 export default calculatorRoutes;
