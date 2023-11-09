@@ -82,6 +82,10 @@ const calculatorSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Price",
     },
+    option: {
+      type: Schema.Types.ObjectId,
+      ref: "Price",
+    },
     products: {
       type: [String],
     },

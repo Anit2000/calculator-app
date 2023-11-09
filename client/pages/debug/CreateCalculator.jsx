@@ -18,7 +18,11 @@ import {
 import { navigate } from "raviger";
 import { AddProductMajor, CashDollarMinor } from "@shopify/polaris-icons";
 import { ResourcePicker } from "@shopify/app-bridge-react";
-import { saveCalculator, getPricing } from "../../helpers/calculator";
+import {
+  saveCalculator,
+  getPricing,
+  listOptions,
+} from "../../helpers/calculator";
 import useFetch from "../../hooks/useFetch";
 
 const CreateCalculator = () => {
@@ -37,6 +41,9 @@ const CreateCalculator = () => {
   const [maxWidth, setMaxWidth] = useState(0);
   const [minHeight, setMinHeight] = useState(0);
   const [maxHeight, setMaxHeight] = useState(0);
+  const [options, setOptions] = useState([]);
+  const [optionModal, setOptionModal] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("");
 
   const fetch = useFetch();
   const handleChange = useCallback((newValue) => {
@@ -74,6 +81,10 @@ const CreateCalculator = () => {
   const handleSelectedPrice = useCallback((newValue) => {
     setSelectedPrice(newValue);
     setcalculator((prev) => ({ price: newValue[0].id, ...prev }));
+  }, []);
+  const handleSelectedOption = useCallback((newValue) => {
+    setSelectedOption(newValue);
+    setcalculator((prev) => ({ option: newValue[0].id, ...prev }));
   }, []);
   const resourceName = {
     singular: "Product",
@@ -167,6 +178,12 @@ const CreateCalculator = () => {
       let pricingList = await getPricing(fetch);
       pricingList = pricingList.map((price) => ({ id: price._id, ...price }));
       setPricingList(pricingList);
+      let optionsList = await listOptions(fetch);
+      optionsList = optionsList.map((option) => ({
+        id: option._id,
+        ...option,
+      }));
+      setOptions(optionsList);
     })();
   }, []);
   return (
@@ -220,6 +237,46 @@ const CreateCalculator = () => {
                     }}
                   >
                     <p>No existing Price found please create new price</p>
+                  </EmptyState>
+                )}
+              </LegacyStack.Item>
+            </LegacyStack>
+          </Modal.Section>
+        </Modal>
+        <Modal
+          open={optionModal}
+          onClose={() => setOptionModal(false)}
+          title="Choose Pricing"
+          primaryAction={{
+            content: "Save",
+            onAction: (value) => {
+              setOptionModal(false);
+            },
+          }}
+        >
+          <Modal.Section>
+            <LegacyStack vertical>
+              <LegacyStack.Item>
+                {options.length > 0 && (
+                  <ChoiceList
+                    title="Options"
+                    choices={options.map((el) => ({
+                      label: el.title,
+                      value: el,
+                    }))}
+                    onChange={handleSelectedOption}
+                    selected={selectedOption}
+                  />
+                )}
+                {options.length == 0 && (
+                  <EmptyState
+                    heading="No Option Found"
+                    action={{
+                      content: "Create Option",
+                      onAction: () => navigate("/debug/options/create-option"),
+                    }}
+                  >
+                    <p>No existing Option found please create new option</p>
                   </EmptyState>
                 )}
               </LegacyStack.Item>
@@ -284,7 +341,7 @@ const CreateCalculator = () => {
             <LegacyCard>
               {pricing.length == 0 && (
                 <EmptyState
-                  heading="Product List Is Empty"
+                  heading="Pricing Is Empty"
                   image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                   action={{
                     content: "Add Pricing",
@@ -321,43 +378,80 @@ const CreateCalculator = () => {
               )}
             </LegacyCard>
           </Grid.Cell>
-          <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 6, xl: 6 }}>
-            <TextField
-              label="Enter Min Width"
-              type="number"
-              value={minWidth}
-              onChange={handleChangeMinWidth}
-              autoComplete="off"
-            />
+          <Grid.Cell columnSpan={{ xs: 12, lg: 6 }}>
+            <LegacyCard>
+              {pricing.length == 0 && (
+                <EmptyState
+                  heading="Option Is Empty"
+                  image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                  action={{
+                    content: "Add Option",
+                    onAction: () => {
+                      setOptionModal(true);
+                    },
+                  }}
+                >
+                  <p>Choose option rule </p>
+                </EmptyState>
+              )}
+              {pricing.length > 0 && (
+                <IndexTable
+                  resourceName={pricingResourceName}
+                  itemCount={pricing.length}
+                  selectedItemsCount={
+                    pricingAllResourcesSelected
+                      ? "All"
+                      : pricingSelectedResoucrce.length
+                  }
+                  headings={[{ title: "Name" }, { title: "Count" }]}
+                  onSelectionChange={handlePriceSelectionChange}
+                  // promotedBulkActions={priceActions}
+                  primaryAction={{
+                    content: "Add Pricing",
+                    action: () => {
+                      console.log("clicked");
+                    },
+                  }}
+                >
+                  {pricingMarkup}
+                </IndexTable>
+              )}
+            </LegacyCard>
           </Grid.Cell>
           <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 6, xl: 6 }}>
-            <TextField
-              label="Enter Max Width"
-              type="number"
-              value={maxWidth}
-              onChange={handleChangeMaxWidth}
-              autoComplete="off"
-            />
-          </Grid.Cell>
-          <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 6, xl: 6 }}>
-            <TextField
-              label="Enter Min Height"
-              type="number"
-              value={minHeight}
-              onChange={handleChangeMinHeight}
-              autoComplete="off"
-            />
-          </Grid.Cell>
-          <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 6, xl: 6 }}>
-            <TextField
-              label="Enter Min Height"
-              type="number"
-              value={maxHeight}
-              onChange={handleChangeMaxHeight}
-              autoComplete="off"
-            />
+            <LegacyCard sectioned>
+              <TextField
+                label="Enter Min Width"
+                type="number"
+                value={minWidth}
+                onChange={handleChangeMinWidth}
+                autoComplete="off"
+              />
+              <TextField
+                label="Enter Max Width"
+                type="number"
+                value={maxWidth}
+                onChange={handleChangeMaxWidth}
+                autoComplete="off"
+              />
+              <TextField
+                label="Enter Min Height"
+                type="number"
+                value={minHeight}
+                onChange={handleChangeMinHeight}
+                autoComplete="off"
+              />
+              <TextField
+                label="Enter Min Height"
+                type="number"
+                value={maxHeight}
+                onChange={handleChangeMaxHeight}
+                autoComplete="off"
+              />
+            </LegacyCard>
           </Grid.Cell>
         </Grid>
+        <div style={{ marginBottom: "50px" }}></div>
       </Page>
     </Frame>
   );
